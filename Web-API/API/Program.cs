@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
+var dbContext = new AppDataContext();
 
 List<Produto> produtos =
 [
@@ -17,7 +18,7 @@ app.MapGet("/", () => "API de produtos");
 
 // listar
 app.MapGet("/produto/listar", () =>
-    produtos);
+    dbContext.Produtos);
 
 // buscar
 app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome) =>
@@ -64,7 +65,8 @@ app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto) =>
             return Results.BadRequest("campos invalidos.");
         }
 
-        produtos.Add(new Produto(novoProduto.Nome, novoProduto.Descricao, novoProduto.Valor));
+        dbContext.Produtos.Add(novoProduto);
+        dbContext.SaveChanges();
 
         return Results.Created("Produto adicionado com sucesso! ", novoProduto);
     });

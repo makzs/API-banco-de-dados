@@ -1,0 +1,22 @@
+###
+GET http://localhost:5259/produto/listar
+
+###
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "pizza",
+    "descricao": "Caixa de pizza media",
+    "valor": 35.60
+}
+
+###
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "bolacha",
+    "descricao": "pacote de bolachas 200g",
+    "valor": 35.60
+}

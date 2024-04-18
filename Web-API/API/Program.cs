@@ -3,6 +3,8 @@ using API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+// registrar o serviço de banco de dados
+builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 var dbContext = new AppDataContext();
 
@@ -17,8 +19,15 @@ List<Produto> produtos =
 app.MapGet("/", () => "API de produtos");
 
 // listar
-app.MapGet("/produto/listar", () =>
-    dbContext.Produtos);
+app.MapGet("/produto/listar", ([FromServices] AppDataContext contexto) =>
+    {
+        if (contexto.Produtos.Any())
+        {
+            return Results.Ok(contexto.Produtos.ToList());
+        }
+
+        return Results.NotFound("Não existem produtos na tabela!");
+    });
 
 // buscar
 app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome) =>
@@ -37,36 +46,18 @@ app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome) =>
     }
 );
 
-// get pela url
-app.MapGet("produto/cadastrar/{nome}/{descricao}/{valor}", ([FromRoute] string nome, [FromRoute] string descricao, [FromRoute] double valor) =>
-    {
-
-        // preencher o objeto pelo construtor
-        Produto novoProduto = new Produto(nome, descricao, valor);
-
-        // verifica se valores strings nao são nulos
-        if (novoProduto.Nome is null || novoProduto.Descricao is null)
-        {
-            return Results.BadRequest("campos invalidos.");
-        }
-
-        // adiciona o objeto novoProduto na lista produtos
-        produtos.Add(new Produto(novoProduto.Nome, novoProduto.Descricao, novoProduto.Valor));
-
-        // retorna o codigo hhtp que o metodo realizou as ações com sucesso
-        return Results.Created("Produto adicionado com sucesso! ", novoProduto);
-    });
-
-// get pelo corpo json
-app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto) =>
+// adiciona um produto no banco de dados
+app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto,
+    [FromServices] AppDataContext contexto) =>
     {
         if (novoProduto.Nome is null || novoProduto.Descricao is null)
         {
             return Results.BadRequest("campos invalidos.");
         }
 
-        dbContext.Produtos.Add(novoProduto);
-        dbContext.SaveChanges();
+        // adicionar objeto no banco de dados
+        contexto.Produtos.Add(novoProduto);
+        contexto.SaveChanges();
 
         return Results.Created("Produto adicionado com sucesso! ", novoProduto);
     });
@@ -74,7 +65,7 @@ app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto) =>
 // alterar produto da lista
 app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Produto produtoAtualizado) =>
 {
-    
+
     Produto? produtoExistente = produtos.FirstOrDefault(p => p.Nome == nome);
 
     if (produtoExistente is null)
@@ -106,7 +97,7 @@ app.MapDelete("/produto/deletar/{Nome}", (string nome) =>
 });
 
 // alterar parcialmente um produto
-app.MapPatch("/produto/patch/{Nome}/{patch}", ( [FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado) =>
+app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado) =>
 {
 
     Produto? produtoExistente = produtos.FirstOrDefault(p => p.Nome == nome);

@@ -81,20 +81,24 @@ app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Pro
 });
 
 // deletar produto da lista
-app.MapDelete("/produto/deletar/{Nome}", (string nome) =>
-{
-
-    Produto? produtoExistente = produtos.FirstOrDefault(p => p.Nome == nome);
-
-    if (produtoExistente is null)
+app.MapDelete("/produto/deletar/{nome}", (string nome,
+    [FromServices] AppDataContext contexto) =>
     {
-        return Results.BadRequest("campos invalidos.");
-    }
+        // Busca o produto pelo nome no banco de dados
+        var produtoParaDeletar = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
 
-    produtos.Remove(produtoExistente);
+        // Se o produto não for encontrado, retorna um erro 404 (Not Found)
+        if (produtoParaDeletar == null)
+        {
+            return Results.NotFound("Produto não encontrado.");
+        }
 
-    return Results.Ok($"Produto {produtoExistente.Nome} deletado com sucesso!");
-});
+        // Remove o produto do contexto e salva as mudanças no banco de dados
+        contexto.Produtos.Remove(produtoParaDeletar);
+        contexto.SaveChanges();
+
+        return Results.Ok("Produto deletado com sucesso!");
+    });
 
 // alterar parcialmente um produto
 app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado) =>

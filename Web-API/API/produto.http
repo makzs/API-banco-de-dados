@@ -27,3 +27,20 @@ Content-Type: application/json
 ###
 DELETE http://localhost:5259/produto/deletar/pizza
 
+###
+PUT http://localhost:5259/produto/atualizar/pizza
+Content-Type: application/json
+
+{
+    "nome": "morango",
+    "descricao": "300g de morangos",
+    "valor": 12.60
+}
+
+###
+PATCH http://localhost:5259/produto/bolacha/Valor
+Content-Type: application/json
+
+{
+    "Valor": 15.60
+}

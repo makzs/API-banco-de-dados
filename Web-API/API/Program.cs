@@ -61,10 +61,10 @@ app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto,
     });
 
 // alterar produto da lista
-app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Produto produtoAtualizado) =>
+app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Produto produtoAtualizado, [FromServices] AppDataContext contexto) =>
 {
 
-    Produto? produtoExistente = produtos.FirstOrDefault(p => p.Nome == nome);
+    Produto? produtoExistente = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
 
     if (produtoExistente is null)
     {
@@ -75,6 +75,7 @@ app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Pro
     produtoExistente.Descricao = produtoAtualizado.Descricao;
     produtoExistente.Valor = produtoAtualizado.Valor;
 
+    contexto.SaveChanges();
     return Results.Ok($"Produto {produtoExistente.Nome} alterado com sucesso!");
 });
 
@@ -99,10 +100,10 @@ app.MapDelete("/produto/deletar/{nome}", (string nome,
     });
 
 // alterar parcialmente um produto
-app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado) =>
+app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado, [FromServices] AppDataContext contexto) =>
 {
 
-    Produto? produtoExistente = produtos.FirstOrDefault(p => p.Nome == nome);
+    Produto? produtoExistente = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
 
     if (produtoExistente is null)
     {
@@ -113,15 +114,19 @@ app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRou
     {
         case "nome":
             produtoExistente.Nome = produtoAtualizado.Nome;
+            contexto.SaveChanges();
             return Results.Ok($"Nome do produto atualizado para: {produtoExistente.Nome}");
         case "descricao":
             produtoExistente.Descricao = produtoAtualizado.Descricao;
+            contexto.SaveChanges();
             return Results.Ok($"Descrição do produto atualizada para: {produtoExistente.Descricao}");
         case "valor":
             produtoExistente.Valor = produtoAtualizado.Valor;
+            contexto.SaveChanges();
             return Results.Ok($"Valor do produto atualizado para: {produtoExistente.Valor}");
         default:
             return Results.BadRequest("Campo 'patch' inválido. Escolha entre 'nome', 'descricao' ou 'valor'.");
+
     }
 });
 

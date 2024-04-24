@@ -2,6 +2,9 @@
 GET http://localhost:5259/produto/listar
 
 ###
+GET http://localhost:5259/produto/buscar/pizza
+
+###
 POST  http://localhost:5259/produto/cadastrar
 Content-Type: application/json
 

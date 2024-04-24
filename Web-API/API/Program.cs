@@ -30,19 +30,17 @@ app.MapGet("/produto/listar", ([FromServices] AppDataContext contexto) =>
     });
 
 // buscar
-app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome) =>
+app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome, [FromServices] AppDataContext contexto) =>
     {
-        for (int i = 0; i < produtos.Count; i++)
-        {
-            if (produtos[i].Nome == nome)
-            {
-                // retornar o produto encontrado 
-                return Results.Ok(produtos[i]);
-            }
+        Produto? produtoExistente = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
 
+        if (produtoExistente is null)
+        {
+            return Results.NotFound("Nome requisitado nao encontrado na lista de produtos");
         }
+
         // caso nao encontre o produto
-        return Results.NotFound("Produto nao encontrado");
+        return Results.Ok(produtoExistente);
     }
 );
 

@@ -18,6 +18,16 @@ Content-Type: application/json
     "descricao": "Caixa de pizza media",
     "valor": 35.60
 }
+###
+
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "feijao",
+    "descricao": "Alimento",
+    "valor": 12.30
+}
 
 ###
 POST  http://localhost:5259/produto/cadastrar

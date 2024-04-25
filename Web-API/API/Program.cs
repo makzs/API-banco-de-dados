@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,20 +53,48 @@ app.MapGet("/produto/buscar/{id}", ([FromRoute] string id, [FromServices] AppDat
     return Results.Ok(produtoExistente);
 });
 
-// adiciona um produto no banco de dados
+/* adiciona um produto no banco de dados
 app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto,
     [FromServices] AppDataContext contexto) =>
 {
+
     if (novoProduto.Nome is null || novoProduto.Descricao is null)
     {
         return Results.BadRequest("campos invalidos.");
     }
+    Produto? produtoEncontrado = contexto.Produtos.FirstOrDefault(x => x.Nome == novoProduto.Nome);
 
     // adicionar objeto no banco de dados
     contexto.Produtos.Add(novoProduto);
     contexto.SaveChanges();
 
     return Results.Created("Produto adicionado com sucesso! ", novoProduto);
+});
+*/
+
+// adiciona um produto no banco de dados com regra de negocio
+app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto,
+    [FromServices] AppDataContext contexto) =>
+{
+    // valida com a lista de erros que esta na classe Produto
+    List<ValidationResult> erros = new List<ValidationResult>();
+    if (!Validator.TryValidateObject(novoProduto, new ValidationContext(novoProduto), erros, true))
+    {
+        return Results.BadRequest(erros);
+    }
+
+    Produto? produtoEncontrado = contexto.Produtos.FirstOrDefault(x => x.Nome == novoProduto.Nome);
+
+    if (produtoEncontrado is null)
+    {
+        // adicionar objeto no banco de dados
+        contexto.Produtos.Add(novoProduto);
+        contexto.SaveChanges();
+        return Results.Created("", novoProduto);
+    }
+
+    return Results.BadRequest("Ja existe um produto com mesmo nome");
+
 });
 
 /* deletar produto do banco de dados por nome

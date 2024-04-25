@@ -1,8 +1,13 @@
 ###
 GET http://localhost:5259/produto/listar
 
+// busca por nome
 ###
 GET http://localhost:5259/produto/buscar/pizza
+
+// busca por ID
+###
+GET http://localhost:5259/produto/buscar/7ca1bb30-9646-4135-aea6-b1e8123efb9e
 
 ###
 POST  http://localhost:5259/produto/cadastrar
@@ -24,9 +29,15 @@ Content-Type: application/json
     "valor": 35.60
 }
 
+// deletar por nome
 ###
 DELETE http://localhost:5259/produto/deletar/pizza
 
+// deletar por id
+###
+DELETE http://localhost:5259/produto/deletar/4d8da81f-5b86-4237-aa6e-dc6e1eb22e6e
+
+// alterar por nome
 ###
 PUT http://localhost:5259/produto/atualizar/pizza
 Content-Type: application/json
@@ -36,6 +47,18 @@ Content-Type: application/json
     "descricao": "300g de morangos",
     "valor": 12.60
 }
+
+// alterar por id
+###
+PUT http://localhost:5259/produto/atualizar/02f915ce-7ea8-42e0-a7ad-b2c61c45d3fd
+Content-Type: application/json
+
+{
+    "nome": "morango",
+    "descricao": "300g de morangos",
+    "valor": 12.60
+}
+
 
 ###
 PATCH http://localhost:5259/produto/patch/bolacha/valor

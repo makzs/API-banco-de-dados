@@ -8,28 +8,21 @@ builder.Services.AddDbContext<AppDataContext>();
 var app = builder.Build();
 var dbContext = new AppDataContext();
 
-List<Produto> produtos =
-[
-    new Produto("Arroz", "pacote de arroz 2kg", 20.50),
-    new Produto("feijao", "pacote de feijao 1kg", 13.20),
-    new Produto("Batata", "saco de 1kg de batata", 15.00),
-    new Produto("Frango", "pacote de 500g de frango", 18.85),
-];
-
 app.MapGet("/", () => "API de produtos");
 
 // listar
 app.MapGet("/produto/listar", ([FromServices] AppDataContext contexto) =>
+{
+    if (contexto.Produtos.Any())
     {
-        if (contexto.Produtos.Any())
-        {
-            return Results.Ok(contexto.Produtos.ToList());
-        }
+        // para lista de tabelas de banco de dados utilizamos ToList
+        return Results.Ok(contexto.Produtos.ToList());
+    }
 
-        return Results.NotFound("Não existem produtos na tabela!");
-    });
+    return Results.NotFound("Não existem produtos na tabela!");
+});
 
-// buscar
+/* buscar por nome
 app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome, [FromServices] AppDataContext contexto) =>
     {
         Produto? produtoExistente = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
@@ -43,24 +36,74 @@ app.MapGet("/produto/buscar/{nome}", ([FromRoute] string nome, [FromServices] Ap
         return Results.Ok(produtoExistente);
     }
 );
+*/
+
+// buscar por ID
+app.MapGet("/produto/buscar/{id}", ([FromRoute] string id, [FromServices] AppDataContext contexto) =>
+{
+    // para buscar um item pela chave primaria usamos find
+    Produto? produtoExistente = contexto.Produtos.Find(id);
+
+    if (produtoExistente is null)
+    {
+        return Results.NotFound("Id requisitado nao encontrado na lista de produtos");
+    }
+
+    return Results.Ok(produtoExistente);
+});
 
 // adiciona um produto no banco de dados
 app.MapPost("/produto/cadastrar", ([FromBody] Produto novoProduto,
     [FromServices] AppDataContext contexto) =>
+{
+    if (novoProduto.Nome is null || novoProduto.Descricao is null)
     {
-        if (novoProduto.Nome is null || novoProduto.Descricao is null)
+        return Results.BadRequest("campos invalidos.");
+    }
+
+    // adicionar objeto no banco de dados
+    contexto.Produtos.Add(novoProduto);
+    contexto.SaveChanges();
+
+    return Results.Created("Produto adicionado com sucesso! ", novoProduto);
+});
+
+/* deletar produto do banco de dados por nome
+app.MapDelete("/produto/deletar/{nome}", (string nome,
+    [FromServices] AppDataContext contexto) =>
+    {
+        Produto? produtoExistente = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
+
+        if (produtoExistente == null)
         {
-            return Results.BadRequest("campos invalidos.");
+            return Results.NotFound("Produto não encontrado.");
         }
 
-        // adicionar objeto no banco de dados
-        contexto.Produtos.Add(novoProduto);
+        contexto.Produtos.Remove(produtoExistente);
         contexto.SaveChanges();
 
-        return Results.Created("Produto adicionado com sucesso! ", novoProduto);
+        return Results.Ok("Produto deletado com sucesso!");
     });
+*/
 
-// alterar produto da lista
+// deletar produto do banco de dados por ID
+app.MapDelete("/produto/deletar/{id}", (string id,
+    [FromServices] AppDataContext contexto) =>
+{
+    Produto? produtoExistente = contexto.Produtos.Find(id);
+
+    if (produtoExistente is null)
+    {
+        return Results.NotFound("Id requisitado nao encontrado na lista de produtos");
+    }
+
+    contexto.Produtos.Remove(produtoExistente);
+    contexto.SaveChanges();
+
+    return Results.Ok("Produto deletado com sucesso!");
+});
+
+/* alterar produto do banco de dados pelo nome
 app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Produto produtoAtualizado, [FromServices] AppDataContext contexto) =>
 {
 
@@ -78,26 +121,26 @@ app.MapPut("/produto/atualizar/{Nome}", ([FromRoute] string nome, [FromBody] Pro
     contexto.SaveChanges();
     return Results.Ok($"Produto {produtoExistente.Nome} alterado com sucesso!");
 });
+*/
 
-// deletar produto da lista
-app.MapDelete("/produto/deletar/{nome}", (string nome,
-    [FromServices] AppDataContext contexto) =>
+// alterar produto do banco de dados pelo id
+app.MapPut("/produto/atualizar/{id}", ([FromRoute] string id, [FromBody] Produto produtoAtualizado, [FromServices] AppDataContext contexto) =>
+{
+    Produto? produtoExistente = contexto.Produtos.Find(id);
+
+    if (produtoExistente is null)
     {
-        // Busca o produto pelo nome no banco de dados
-        var produtoParaDeletar = contexto.Produtos.FirstOrDefault(p => p.Nome == nome);
+        return Results.NotFound("Id requisitado nao encontrado na lista de produtos");
+    }
 
-        // Se o produto não for encontrado, retorna um erro 404 (Not Found)
-        if (produtoParaDeletar == null)
-        {
-            return Results.NotFound("Produto não encontrado.");
-        }
+    produtoExistente.Nome = produtoAtualizado.Nome;
+    produtoExistente.Descricao = produtoAtualizado.Descricao;
+    produtoExistente.Valor = produtoAtualizado.Valor;
 
-        // Remove o produto do contexto e salva as mudanças no banco de dados
-        contexto.Produtos.Remove(produtoParaDeletar);
-        contexto.SaveChanges();
-
-        return Results.Ok("Produto deletado com sucesso!");
-    });
+    contexto.Produtos.Update(produtoExistente);
+    contexto.SaveChanges();
+    return Results.Ok($"Produto alterado com sucesso!");
+});
 
 // alterar parcialmente um produto
 app.MapPatch("/produto/patch/{Nome}/{patch}", ([FromRoute] string nome, [FromRoute] string patch, [FromBody] Produto produtoAtualizado, [FromServices] AppDataContext contexto) =>

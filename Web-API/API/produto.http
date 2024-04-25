@@ -38,9 +38,9 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:5259/produto/bolacha/Valor
+PATCH http://localhost:5259/produto/patch/bolacha/valor
 Content-Type: application/json
 
 {
-    "Valor": 15.60
+    "valor": 15.60
 }

@@ -18,6 +18,25 @@ Content-Type: application/json
     "descricao": "Caixa de pizza media",
     "valor": 35.60
 }
+
+###
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "laranja",
+    "descricao": "1kg",
+    "valor": 17.60
+}
+###
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "cafe",
+    "descricao": "1kg de café",
+    "valor": 23.10
+}
 ###
 
 POST  http://localhost:5259/produto/cadastrar
@@ -42,6 +61,8 @@ Content-Type: application/json
 // deletar por nome
 ###
 DELETE http://localhost:5259/produto/deletar/pizza
+###
+DELETE http://localhost:5259/produto/deletar/cafe
 
 // deletar por id
 ###
@@ -56,6 +77,15 @@ Content-Type: application/json
     "nome": "morango",
     "descricao": "300g de morangos",
     "valor": 12.60
+}
+###
+PUT http://localhost:5259/produto/atualizar/laranja
+Content-Type: application/json
+
+{
+    "nome": "abacaxi",
+    "descricao": "1kg de abacaxi",
+    "valor": 20.90
 }
 
 // alterar por id

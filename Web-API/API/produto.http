@@ -57,6 +57,15 @@ Content-Type: application/json
     "descricao": "pacote de bolachas 200g",
     "valor": 35.60
 }
+###
+POST  http://localhost:5259/produto/cadastrar
+Content-Type: application/json
+
+{
+    "nome": "comida",
+    "descricao": "alimento",
+    "valor": 20.60
+}
 
 // deletar por nome
 ###
@@ -106,4 +115,11 @@ Content-Type: application/json
 
 {
     "valor": 15.60
+}
+###
+PATCH http://localhost:5259/produto/patch/morango/nome
+Content-Type: application/json
+
+{
+    "nome": "batata",
 }

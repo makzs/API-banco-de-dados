@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "nome": "pizza",
-    "descricao": "Caixa de pizza media",
+    "descricao": "pizza",
     "valor": 35.60
 }
 
@@ -34,7 +34,7 @@ Content-Type: application/json
 
 {
     "nome": "cafe",
-    "descricao": "1kg de café",
+    "descricao": "café",
     "valor": 23.10
 }
 ###
@@ -54,7 +54,7 @@ Content-Type: application/json
 
 {
     "nome": "bolacha",
-    "descricao": "pacote de bolachas 200g",
+    "descricao": "bolachas",
     "valor": 35.60
 }
 ###
